@@ -1,12 +1,18 @@
-import dotenv from 'dotenv';
+import fs from "fs/promises";
+import path from "path";
+import dotenv from "dotenv";
 dotenv.config();
 
 // TODO: Define an interface for the Coordinates object
-
+interface Coordinates {}
 // TODO: Define a class for the Weather object
 
 // TODO: Complete the WeatherService class
 class WeatherService {
+  private filePath: string;
+  constructor() {
+    this.filePath = path.resolve(__dirname, "");
+  }
   // TODO: Define the baseURL, API key, and city name properties
   // TODO: Create fetchLocationData method
   // private async fetchLocationData(query: string) {}

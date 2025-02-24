@@ -1,17 +1,72 @@
+import fs from "fs/promises";
+import path from "path";
+import { v4 as uuidv4 } from "uuid";
+
+async function fileExists(filePath: string): Promise<boolean> {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
 // TODO: Define a City class with name and id properties
+class City {
+  id: string;
+  name: string;
+  constructor(id: string, name: string) {
+    this.id = id;
+    this.name = name;
+  }
+}
+export { City };
 
 // TODO: Complete the HistoryService class
 class HistoryService {
+  private filePath: string;
+  constructor() {
+    this.filePath = path.resolve(__dirname, "../data/searchHistory.json");
+  }
+
   // TODO: Define a read method that reads from the searchHistory.json file
-  // private async read() {}
+  private async read(): Promise<City[]> {
+    if (!(await fileExists(this.filePath))) {
+      await fs.writeFile(this.filePath, "[]"); // Make one if there isn't one already
+      return [];
+    }
+    const data = await fs.readFile(this.filePath, "utf-8");
+    const citiesData = JSON.parse(data);
+    return citiesData.map(
+      (city: { id: string; name: string }) => new City(city.id, city.name)
+    );
+  }
+
   // TODO: Define a write method that writes the updated cities array to the searchHistory.json file
-  // private async write(cities: City[]) {}
+  private async writeHistory(cities: City[]): Promise<void> {
+    await fs.writeFile(this.filePath, JSON.stringify(cities, null, 2));
+  }
   // TODO: Define a getCities method that reads the cities from the searchHistory.json file and returns them as an array of City objects
-  // async getCities() {}
+  async getCities(): Promise<City[]> {
+    return this.read();
+  }
   // TODO Define an addCity method that adds a city to the searchHistory.json file
-  // async addCity(city: string) {}
+  async addCity(name: string): Promise<void> {
+    const cities = await this.read();
+    if (cities.some((city) => city.name.toLowerCase() === name.toLowerCase()))
+      return;
+
+    const newCity = new City(uuidv4(), name);
+    cities.push(newCity);
+
+    await this.writeHistory(cities);
+  }
   // * BONUS TODO: Define a removeCity method that removes a city from the searchHistory.json file
-  // async removeCity(id: string) {}
+  async removeCity(id: string): Promise<void> {
+    const cities = await this.read();
+    const updatedCities = cities.filter((city) => city.id !== id);
+
+    await this.writeHistory(updatedCities);
+  }
 }
 
 export default new HistoryService();

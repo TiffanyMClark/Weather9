@@ -5,14 +5,13 @@ import WeatherService from "../../service/weatherService.js";
 
 // TODO: POST Request with city name to retrieve weather data
 router.post("/", async (req, res) => {
-  // TODO: GET weather data from city name
   try {
     const { city } = req.body;
     if (!city) {
       return res.status(400).json({ error: "City name is required" });
     }
     const weatherData = await WeatherService.getWeather(city);
-    // TODO: save city to search history
+    // Save city to search history
     await HistoryService.saveSearch(city);
     res.json({ city, weather: weatherData });
   } catch (error) {
@@ -23,18 +22,17 @@ router.post("/", async (req, res) => {
 // TODO: GET search history
 router.get("/history", async (req, res) => {
   try {
-    const history = await historyService.getSearchHistory();
+    const history = await HistoryService.getSearchHistory(); // Fixed naming issue
     res.json({ history });
   } catch (error) {
     res.status(500).json({ error: "Failed to retrieve search history" });
   }
 });
-
 // * BONUS TODO: DELETE city from search history
 router.delete("/history/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const deleted = await historyService.deleteSearch(id);
+    const deleted = await HistoryService.deleteSearch(id); // Fixed naming issue
 
     if (!deleted) {
       return res.status(404).json({ error: "City not found in history" });

@@ -8,39 +8,43 @@ router.post("/", async (req, res) => {
   try {
     const { city } = req.body;
     if (!city) {
-      return res.status(400).json({ error: "City name is required" });
+      return res.status(400).json({ error: "City is required" });
     }
-    const weatherData = await WeatherService.getWeather(city);
-    // Save city to search history
-    await HistoryService.saveSearch(city);
-    res.json({ city, weather: weatherData });
+
+    const weatherData = await WeatherService.getWeatherForCity(city);
+    if (!weatherData) {
+      return res.status(404).json({ error: "Weather data not found" });
+    }
+
+    await HistoryService.addCity(city);
+
+    return res.status(200).json({ weather: weatherData });
   } catch (error) {
-    res.status(500).json({ error: "Failed to retrieve weather data" });
+    console.error("Error fetching weather:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
 // TODO: GET search history
-router.get("/history", async (req, res) => {
+router.get("/history", async (_req, res) => {
   try {
-    const history = await HistoryService.getSearchHistory(); // Fixed naming issue
-    res.json({ history });
+    const history = await HistoryService.getCities(); // Fetch saved cities
+    return res.status(200).json({ history });
   } catch (error) {
-    res.status(500).json({ error: "Failed to retrieve search history" });
+    console.error("Error retrieving history:", error);
+    return res.status(500).json({ error: "Failed to retrieve search history" });
   }
 });
+
 // * BONUS TODO: DELETE city from search history
 router.delete("/history/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const deleted = await HistoryService.deleteSearch(id); // Fixed naming issue
-
-    if (!deleted) {
-      return res.status(404).json({ error: "City not found in history" });
-    }
-
-    res.json({ message: "City removed from history" });
+    await HistoryService.removeCity(id);
+    return res.status(200).json({ message: "City deleted" });
   } catch (error) {
-    res.status(500).json({ error: "Failed to delete city from history" });
+    console.error("Error deleting city:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 export default router;

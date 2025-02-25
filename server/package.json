@@ -15,7 +15,7 @@
       "src"
     ],
     "ext": "ts,json",
-    "exec": "npx ts-node src/server.ts"
+    "exec": "node --loader ts-node/esm src/server.ts"
   },
   "author": "",
   "license": "ISC",
@@ -33,6 +33,7 @@
     "@types/node": "^20.17.19",
     "@types/uuid": "^9.0.8",
     "nodemon": "^3.1.0",
-    "typescript": "^5.4.5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
   }
 }

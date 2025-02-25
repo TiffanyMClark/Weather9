@@ -28,24 +28,29 @@ export { City };
 class HistoryService {
   private filePath: string;
   constructor() {
-    this.filePath = path.resolve(__dirname, "../data/searchHistory.json");
+    this.filePath = path.resolve(__dirname, "serverdbsearchHistory.json");
   }
 
   // TODO: Define a read method that reads from the searchHistory.json file
   private async read(): Promise<City[]> {
-    if (!(await fileExists(this.filePath))) {
-      await fs.writeFile(this.filePath, "[]"); // Make one if there isn't one already
-      return [];
+    try {
+      if (!(await fileExists(this.filePath))) {
+        await fs.writeFile(this.filePath, "[]"); // Make one if there isn't one already
+        return [];
+      }
+      const data = await fs.readFile(this.filePath, "utf-8");
+      const citiesData = JSON.parse(data);
+      return citiesData.map(
+        (city: { id: string; name: string }) => new City(city.id, city.name)
+      );
+    } catch (error) {
+      console.error("Error reading the file:", error);
+      throw new Error("Failed to retrieve search history");
     }
-    const data = await fs.readFile(this.filePath, "utf-8");
-    const citiesData = JSON.parse(data);
-    return citiesData.map(
-      (city: { id: string; name: string }) => new City(city.id, city.name)
-    );
   }
-
   // TODO: Define a write method that writes the updated cities array to the searchHistory.json file
   private async writeHistory(cities: City[]): Promise<void> {
+    console.log("Writing cities to file:", cities);
     await fs.writeFile(this.filePath, JSON.stringify(cities, null, 2));
   }
   // TODO: Define a getCities method that reads the cities from the searchHistory.json file and returns them as an array of City objects

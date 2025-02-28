@@ -59,13 +59,20 @@ class HistoryService {
   }
   // TODO Define an addCity method that adds a city to the searchHistory.json file
   async addCity(cityName: string): Promise<void> {
+    const trimmedCityName = cityName.trim();
+    if (!trimmedCityName) {
+      throw new Error("City name cannot be empty.");
+    }
     const cities = await this.read();
     if (
-      cities.some((city) => city.name.toLowerCase() === cityName.toLowerCase())
-    )
+      cities.some(
+        (city) => city.name.toLowerCase() === trimmedCityName.toLowerCase()
+      )
+    ) {
       return;
+    }
 
-    const newCity = new City(uuidv4(), cityName);
+    const newCity = new City(uuidv4(), trimmedCityName);
     cities.push(newCity);
 
     await this.writeHistory(cities);

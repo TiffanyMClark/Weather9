@@ -12,13 +12,23 @@ router.post("/", async (req, res) => {
     }
 
     const weatherData = await WeatherService.getWeatherForCity(cityName);
+    console.log("Weather Data from Weather Service:", weatherData);
     if (!weatherData) {
       return res.status(404).json({ error: "Weather data not found" });
     }
+    const currentWeather = {
+      city: cityName, // Add city from the input
+      date: new Date().toLocaleDateString(),
+      icon: weatherData.icon || "default-icon", // Fallback icon
+      iconDescription: weatherData.description || "No description",
+      tempF: weatherData.temperature || 0, // Fallback temperature
+      windSpeed: weatherData.windSpeed || 0, // Fallback wind speed
+      humidity: weatherData.humidity || 0, // Fallback humidity
+    };
 
     await HistoryService.addCity(cityName);
 
-    return res.status(200).json({ weather: weatherData });
+    return res.status(200).json({ weather: currentWeather });
   } catch (error) {
     console.error("Error fetching weather:", error);
     return res.status(500).json({ error: "Internal server error" });

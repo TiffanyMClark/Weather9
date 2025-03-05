@@ -1,9 +1,11 @@
 import { Router } from "express";
-const router = Router();
+import { v4 as uuidv4 } from "uuid"; // Import uuid to generate unique IDs
 import HistoryService from "../../service/historyService.js";
 import WeatherService from "../../service/weatherService.js";
 
-// TODO: POST Request with city name to retrieve weather data
+const router = Router();
+
+// POST Request to save city and retrieve weather data
 router.post("/", async (req, res) => {
   try {
     const { cityName } = req.body;
@@ -16,29 +18,38 @@ router.post("/", async (req, res) => {
     if (!weatherData) {
       return res.status(404).json({ error: "Weather data not found" });
     }
+
     const currentWeather = {
       city: cityName, // Add city from the input
       date: new Date().toLocaleDateString(),
-      icon: weatherData.icon || "default-icon", // Fallback icon
+      icon: weatherData.icon || "default-icon",
       iconDescription: weatherData.description || "No description",
-      tempF: weatherData.temperature || 0, // Fallback temperature
-      windSpeed: weatherData.windSpeed || 0, // Fallback wind speed
-      humidity: weatherData.humidity || 0, // Fallback humidity
+      tempC: weatherData.temp || 0,
+      windSpeed: weatherData.windSpeed || 0,
+      humidity: weatherData.humidity || 0,
     };
 
+    // Add city to the history
     await HistoryService.addCity(cityName);
 
-    return res.status(200).json({ weather: currentWeather });
+    // Declare the addedCity object
+    const addedCity = {
+      id: uuidv4(), // generate a new id for the city
+      cityName: cityName,
+    };
+
+    // Return the weather data along with the addedCity
+    return res.status(200).json({ weather: currentWeather, addedCity });
   } catch (error) {
     console.error("Error fetching weather:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// TODO: GET search history
+// GET search history
 router.get("/history", async (_req, res) => {
   try {
-    const history = await HistoryService.getCities(); // Fetch saved cities
+    const history = await HistoryService.getCities(); // Fetch saved cities with IDs
     return res.status(200).json({ history });
   } catch (error) {
     console.error("Error retrieving history:", error);
@@ -46,7 +57,7 @@ router.get("/history", async (_req, res) => {
   }
 });
 
-// * BONUS TODO: DELETE city from search history
+// DELETE city from search history
 router.delete("/history/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -57,4 +68,5 @@ router.delete("/history/:id", async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
 export default router;

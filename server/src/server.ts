@@ -15,7 +15,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 3001;
 
 // TODO: Serve static files of entire client dist folder
-app.use(express.static(path.resolve(__dirname, "../client/dist")));
+app.use(express.static(path.resolve(__dirname, "../client/build")));
 
 // TODO: Implement middleware for parsing JSON and urlencoded form data
 app.use(express.json());

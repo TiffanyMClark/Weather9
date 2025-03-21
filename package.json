@@ -12,9 +12,8 @@
     "install": "cd server && npm i && cd ../client && npm i",
     "client:build": "cd client && npm run build",
     "client:dev": "cd client && npm run dev",
-    "build": "npx tsc && vite build",
-    "preview": "vite preview",
-    "render-build": "npm install && npm run client:build && npm run server:build"
+    "build": "react-scripts build && mv build dist",
+    "render-build": "npm install && npm run build"
   },
   "keywords": [],
   "author": "",

@@ -1,27 +1,28 @@
 import dotenv from "dotenv";
-import path from "path";
 import express from "express";
-import { fileURLToPath } from "url";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 dotenv.config();
 
 // Import the routes
 import routes from "./routes/index.js";
+import bodyParser from "body-parser";
 
 const app = express();
-app.use(express.json());
+
 const PORT = process.env.PORT || 3001;
 
-// TODO: Serve static files of entire client dist folder
-app.use(express.static(path.resolve(__dirname, "../client/build")));
+// Serve static files of entire client dist folder
+app.use(express.static(`../client/dist`));
 
-// TODO: Implement middleware for parsing JSON and urlencoded form data
+// Implement middleware for parsing JSON and urlencoded form data
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-// TODO: Implement middleware to connect the routes
+function urlencoded(options: { extended: boolean }) {
+  return bodyParser.urlencoded(options);
+}
+app.use(urlencoded({ extended: true }));
+
+// Implement middleware to connect the routes
 app.use(routes);
 
 // Start the server on the port
 app.listen(PORT, () => console.log(`Listening on PORT: ${PORT}`));
+app.use(bodyParser.urlencoded({ extended: true }));

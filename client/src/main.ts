@@ -37,31 +37,28 @@ API Calls
 const fetchWeather = async (cityName: string) => {
   const response = await fetch("/api/weather/", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ cityName }),
   });
 
   const weatherData = await response.json();
-  console.log("weatherData:", weatherData); // Debugging
 
-  if (weatherData.weather) {
-    renderCurrentWeather(weatherData.weather); // Pass weather object correctly
-  } else {
-    console.error("Weather data is missing:", weatherData);
-  }
+  console.log("weatherData: ", weatherData);
 
-  renderForecast(weatherData.forecast || []); // Ensure forecast is handled
+  renderCurrentWeather(weatherData[0]);
+  renderForecast(weatherData.slice(1));
 };
 
 const fetchSearchHistory = async () => {
-  const response = await fetch("/api/weather/history", {
+  const history = await fetch("/api/weather/history", {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
-
-  const historyData = await response.json();
-  console.log("Search History Data:", historyData); // Debugging
-  return historyData;
+  return history;
 };
 
 const deleteCityFromHistory = async (id: string) => {
@@ -80,12 +77,10 @@ Render Functions
 */
 
 const renderCurrentWeather = (currentWeather: any): void => {
-  const { city, date, icon, iconDescription, tempC, windSpeed, humidity } =
+  const { city, date, icon, iconDescription, tempF, windSpeed, humidity } =
     currentWeather;
 
-  // Ensure temperature is converted if tempF is missing
-  const tempF = tempC !== undefined ? (tempC * 9) / 5 + 32 : "N/A";
-
+  // convert the following to typescript
   heading.textContent = `${city} (${date})`;
   weatherIcon.setAttribute(
     "src",
@@ -144,20 +139,18 @@ const renderForecastCard = (forecast: any) => {
   }
 };
 
-const renderSearchHistory = async () => {
-  const historyList = await fetchSearchHistory();
-
-  console.log("Rendering History:", historyList); // Debugging
+const renderSearchHistory = async (searchHistory: any) => {
+  const historyList = await searchHistory.json();
 
   if (searchHistoryContainer) {
     searchHistoryContainer.innerHTML = "";
 
-    if (!historyList || historyList.length === 0) {
+    if (!historyList.length) {
       searchHistoryContainer.innerHTML =
         '<p class="text-center">No Previous Search History</p>';
-      return;
     }
 
+    // * Start at end of history array and count down to show the most recent cities at the top.
     for (let i = historyList.length - 1; i >= 0; i--) {
       const historyItem = buildHistoryListItem(historyList[i]);
       searchHistoryContainer.append(historyItem);
